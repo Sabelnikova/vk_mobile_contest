@@ -3,4 +3,8 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="user_name_text_color">#2C2D2E</color>
+    <color name="date_text_color">#818C99</color>
+    <color name="post_text_color">#2A2D31</color>
 </resources>
