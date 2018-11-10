@@ -11,10 +11,6 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val vkRepository: VkRepository): ViewModel() {
 
     val postsLiveData = MediatorLiveData<ApiResponse<Discover>>()
-    get() {
-        loadNext()
-        return field
-    }
 
     fun loadNext() = postsLiveData.addSource(vkRepository.getDiscover(postsLiveData.value?.body?.nextPage)){
         postsLiveData.value = it

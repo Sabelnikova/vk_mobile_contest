@@ -16,7 +16,7 @@ interface ApiService {
                                  @Query("start_from") from: String? = null,
                                  @Query("extended") extended: Int = 1,
                                  @Query("access_token") token: String,
-                                 @Query("version") version: String = API_VERSION):
+                                 @Query("v") version: String = API_VERSION):
             LiveData<ApiResponse<Discover>>
 
     @GET("method/likes.add")
@@ -24,7 +24,7 @@ interface ApiService {
              @Query("owner_id") ownerId: Long,
              @Query("item_id") itemId: Long,
              @Query("access_token") token: String,
-             @Query("version") version: String = API_VERSION):
+             @Query("v") version: String = API_VERSION):
             LiveData<ApiResponse<LikeResponse>>
 
     @GET("method/newsfeed.ignoreItem")
@@ -32,6 +32,6 @@ interface ApiService {
                @Query("owner_id") ownerId: Long,
                @Query("item_id") itemId: Long,
                @Query("access_token") token: String,
-               @Query("version") version: String = API_VERSION): LiveData<ApiResponse<Int>>
+               @Query("v") version: String = API_VERSION): LiveData<ApiResponse<Int>>
 
 }

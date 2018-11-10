@@ -1,6 +1,7 @@
 package com.sabelnikova.vkdiscover.ui
 
 import android.animation.Animator
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
@@ -19,23 +20,38 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
         RIGHT
     }
 
-    var adapter: StackView.Adapter<*>? = null
+    var adapter: StackView.Adapter? = null
         set(value) {
             field = value
-            if (value?.getItemsCount() != 0) {
-                value?.getView(this, 0)?.let { setFront(it) }
+            field?.onDataSet = {
+                getFirstDataFromAdapter(field)
             }
+            getFirstDataFromAdapter(field)
+        }
+    var swipeEnabled = true
+    var dataSet = false
 
-            if (value?.getItemsCount() ?: 0 > 1) {
-                value?.getView(this, 1)?.let { setBack(it) }
+    var frontViewHolder: ViewHolder? = null
+        get() {
+            if (field == null) {
+                field = adapter?.createViewHolder(this)
             }
+            return field
         }
 
-    var swipeEnabled = true
+    var backViewHolder: ViewHolder? = null
+        get() {
+            if (field == null) {
+                field = adapter?.createViewHolder(this)
+            }
+            return field
+        }
 
     private var frontView: View? = null
+        get() = frontViewHolder?.view
 
     private var backView: View? = null
+        get() = backViewHolder?.view
 
     private var lastX: Float? = null
 
@@ -45,26 +61,13 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
 
     var onStartSwipe: ((position: Int, direction: SwipeDirection) -> Unit)? = null
     var onStopSwipe: ((position: Int, direction: SwipeDirection) -> Unit)? = null
-
-    fun getFrontView() = frontView
+    var onItemAppearInBack: ((position: Int) -> Unit)? = null
 
     fun swipe(direction: SwipeDirection) =
             when (direction) {
                 SwipeDirection.LEFT -> swipe(-1)
                 SwipeDirection.RIGHT -> swipe(1)
             }
-
-    private fun setFront(view: View) {
-        frontView = view
-        addView(frontView)
-    }
-
-    private fun setBack(view: View) {
-        backView = view
-        backView?.scaleX = 0.95f
-        backView?.scaleY = 0.95f
-        addView(backView, 0)
-    }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (!swipeEnabled) return false
@@ -106,23 +109,50 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
         return true
     }
 
+    private fun setFront(view: View) {
+        addView(view)
+    }
+
+    private fun setBack(view: View) {
+        view.rotation = 0f
+        view.translationX = 0f
+        view.scaleX = 0.95f
+        view.scaleY = 0.95f
+        addView(view, 0)
+    }
+
+    private fun updateBack(position: Int) {
+        backViewHolder?.let { adapter?.bindViewHolder(it, position) }
+        backViewHolder?.view?.let { setBack(it) }
+        onItemAppearInBack?.invoke(position)
+    }
+
+    private fun swapViewHolders() {
+        val temp = frontViewHolder
+        frontViewHolder = backViewHolder
+        backViewHolder = temp
+    }
+
     private fun swipe(sign: Int) {
         val windowSize = Point()
         (context as? Activity)?.windowManager?.defaultDisplay?.getSize(windowSize)
 
         backView?.animate()?.scaleX(1f)
         backView?.animate()?.scaleY(1f)
-        frontView?.animate()?.rotation(8f * sign)
+        val rotationAnimation = ObjectAnimator.ofFloat(frontView, "rotation", sign * 8f)
         val swipeAnimation = ObjectAnimator.ofFloat(frontView, "translationX", sign * windowSize.x * 1f)
-        swipeAnimation.addListener(object : Animator.AnimatorListener {
+
+        val swipeSet = AnimatorSet()
+        swipeSet.playTogether(rotationAnimation, swipeAnimation)
+        swipeSet.addListener(object : Animator.AnimatorListener {
             override fun onAnimationRepeat(animation: Animator?) {
             }
 
             override fun onAnimationEnd(animation: Animator?) {
                 removeView(frontView)
-                frontView = backView
+                swapViewHolders()
                 if (adapter?.getItemsCount() ?: 0 > currentIndex + 2) {
-                    adapter?.getView(this@StackView, currentIndex + 2)?.let { setBack(it) }
+                    updateBack(currentIndex + 2)
                     currentIndex++
                 }
             }
@@ -133,29 +163,41 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
 
 
         })
-        swipeAnimation?.start()
+        swipeSet.start()
         lastX = null
         currentDirection = null
     }
 
-    abstract class Adapter<T> {
+    private fun getFirstDataFromAdapter(adapter: Adapter?) {
+        if (dataSet) return
 
-        private val items = mutableListOf<T>()
-
-        abstract fun getView(parent: ViewGroup, position: Int): View
-
-        fun getItemsCount() = items.size
-
-        fun getItem(position: Int) = items[position]
-
-        fun addItems(items: List<T>) {
-            this.items.addAll(items)
+        if (adapter?.getItemsCount() != 0) {
+            frontViewHolder?.view?.let { setFront(it) }
+            frontViewHolder?.let { adapter?.bindViewHolder(it, 0) }
+            dataSet = true
         }
 
-        fun setItems(items: List<T>) {
-            this.items.clear()
-            addItems(items)
+        if (adapter?.getItemsCount() ?: 0 > 1) {
+            backViewHolder?.view?.let { setBack(it) }
+            backViewHolder?.let { adapter?.bindViewHolder(it, 1) }
         }
-
     }
+
+
+    abstract class Adapter {
+
+        var onDataSet: (() -> Unit)? = null
+
+        abstract fun createViewHolder(parent: ViewGroup): ViewHolder
+
+        abstract fun getItemsCount(): Int
+
+        abstract fun bindViewHolder(viewHolder: ViewHolder, position: Int)
+
+        fun notifyDataSet() {
+            onDataSet?.invoke()
+        }
+    }
+
+    abstract class ViewHolder(var view: View)
 }

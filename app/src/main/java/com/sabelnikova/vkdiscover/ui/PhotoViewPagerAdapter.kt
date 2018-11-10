@@ -19,8 +19,6 @@ class PhotoViewPagerAdapter : PagerAdapter() {
 
         val imageView = ImageView(container.context)
 
-        imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-
         Glide.with(container.context)
                 .asBitmap()
                 .load(photos?.get(position))

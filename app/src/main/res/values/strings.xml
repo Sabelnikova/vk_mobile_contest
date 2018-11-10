@@ -6,4 +6,5 @@
     <string name="like">Мне нравится</string>
     <string name="expand">Еще</string>
     <string name="hide">Свернуть</string>
+    <string name="no_more_posts">Посты закончились :(</string>
 </resources>
