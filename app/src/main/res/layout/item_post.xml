@@ -1,136 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sabelnikova.vkdiscover.ui.LockableScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:layout_marginBottom="70dp"
+    android:scrollbars="none">
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/bg_card_elevation16"
-        android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="40dp">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/avatarIv"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                tools:src="@tools:sample/avatars" />
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_card_elevation16"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="40dp">
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/avatarIv"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    tools:src="@tools:sample/avatars" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/userNameTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_medium"
+                        android:textColor="@color/user_name_text_color"
+                        android:textSize="14sp"
+                        tools:text="Иван Иванов" />
+
+                    <TextView
+                        android:id="@+id/dateTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto"
+                        android:textColor="@color/date_text_color"
+                        android:textSize="12sp"
+                        tools:text="14 окт. в 22:34" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.sabelnikova.vkdiscover.ui.PhotoViewPager
+                    android:id="@+id/photoViewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/photoTabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_margin="8dp"
+                    android:clipToPadding="false"
+                    app:tabBackground="@drawable/tab"
+                    app:tabIndicatorHeight="0dp"
+                    app:tabPaddingEnd="10dp"
+                    app:tabPaddingStart="10dp" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/textTv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:fontFamily="@font/roboto"
+                android:textColor="@color/post_text_color"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:id="@+id/expandLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:orientation="vertical">
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"
+                android:visibility="visible">
 
                 <TextView
-                    android:id="@+id/userNameTv"
+                    android:id="@+id/expandTv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/roboto_medium"
-                    android:textColor="@color/user_name_text_color"
-                    android:textSize="14sp"
-                    tools:text="Иван Иванов" />
+                    android:text="@string/expand"
+                    android:textAllCaps="true"
+                    android:textColor="#99A2AD"
+                    android:textSize="13sp" />
 
-                <TextView
-                    android:id="@+id/dateTv"
+                <ImageView
+                    android:id="@+id/expandIv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/roboto"
-                    android:textColor="@color/date_text_color"
-                    android:textSize="12sp"
-                    tools:text="14 окт. в 22:34" />
-            </LinearLayout>
+                    android:layout_marginStart="7dp"
+                    android:src="@drawable/ic_dropdown_16" />
 
+            </LinearLayout>
         </LinearLayout>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.sabelnikova.vkdiscover.ui.PhotoViewPager
-                android:id="@+id/photoViewPager"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/photoTabLayout"
-                android:layout_width="match_parent"
-                android:layout_margin="8dp"
-                android:layout_height="2dp"
-                app:tabBackground="@drawable/tab"
-                app:tabIndicatorHeight="0dp"
-                app:tabPaddingStart="10dp"
-                app:tabPaddingEnd="10dp"
-                android:clipToPadding="false"/>
-
-        </FrameLayout>
-
         <TextView
-            android:id="@+id/textTv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            android:fontFamily="@font/roboto"
-            android:textSize="15sp"
-            android:textColor="@color/post_text_color"/>
-
-        <TextView
-            android:layout_gravity="center_horizontal"
+            android:id="@+id/skipTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="8dp"
+            android:alpha="0"
+            android:background="@drawable/bg_button_skip_elevation16"
+            android:paddingStart="32dp"
+            android:paddingTop="27dp"
+            android:paddingEnd="32dp"
+            android:paddingBottom="45dp"
+            android:rotation="4"
+            android:text="@string/skip"
             android:textAllCaps="true"
-            android:textColor="#99A2AD"
-            android:textSize="13sp"
-            android:fontFamily="@font/roboto_medium"
-            android:drawableEnd="@drawable/ic_dropdown_16"
-            android:text="Еще"
-            android:drawablePadding="7dp"/>
-    </LinearLayout>
+            android:textColor="@android:color/white" />
 
-    <TextView
-        android:id="@+id/skipTv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="8dp"
-        android:alpha="0"
-        android:background="@drawable/bg_button_skip_elevation16"
-        android:paddingStart="32dp"
-        android:paddingTop="27dp"
-        android:paddingEnd="32dp"
-        android:paddingBottom="45dp"
-        android:rotation="4"
-        android:text="@string/skip"
-        android:textAllCaps="true"
-        android:textColor="@android:color/white" />
-
-    <TextView
-        android:id="@+id/likeTv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
-        android:alpha="0"
-        android:background="@drawable/bg_button_like_elevation16"
-        android:paddingStart="32dp"
-        android:paddingTop="27dp"
-        android:paddingEnd="32dp"
-        android:paddingBottom="45dp"
-        android:rotation="-4"
-        android:text="@string/like"
-        android:textAllCaps="true"
-        android:textColor="@android:color/white" />
-</FrameLayout>
+        <TextView
+            android:id="@+id/likeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:alpha="0"
+            android:background="@drawable/bg_button_like_elevation16"
+            android:paddingStart="32dp"
+            android:paddingTop="27dp"
+            android:paddingEnd="32dp"
+            android:paddingBottom="45dp"
+            android:rotation="-4"
+            android:text="@string/like"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white" />
+    </FrameLayout>
+</com.sabelnikova.vkdiscover.ui.LockableScrollView>

@@ -31,6 +31,8 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
             }
         }
 
+    var swipeEnabled = true
+
     private var frontView: View? = null
 
     private var backView: View? = null

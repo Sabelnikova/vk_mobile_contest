@@ -3,4 +3,6 @@
     <string name="vk_id">6746336</string>
     <string name="skip">Пропустить</string>
     <string name="like">Мне нравится</string>
+    <string name="expand">Еще</string>
+    <string name="hide">Свернуть</string>
 </resources>
