@@ -7,12 +7,31 @@ import retrofit2.http.Query
 
 interface ApiService {
 
+    companion object {
+        const val API_VERSION = "5.87"
+    }
+
     @GET("method/newsfeed.getDiscoverForContestant")
     fun getDiscoverForContestant(@Query("count") count: Int,
                                  @Query("start_from") from: String? = null,
                                  @Query("extended") extended: Int = 1,
                                  @Query("access_token") token: String,
-                                 @Query("version") version: String = "5.87"):
+                                 @Query("version") version: String = API_VERSION):
             LiveData<ApiResponse<Discover>>
+
+    @GET("method/likes.add")
+    fun like(@Query("type") type: String,
+             @Query("owner_id") ownerId: Long,
+             @Query("item_id") itemId: Long,
+             @Query("access_token") token: String,
+             @Query("version") version: String = API_VERSION):
+            LiveData<ApiResponse<LikeResponse>>
+
+    @GET("method/newsfeed.ignoreItem")
+    fun ignore(@Query("type") type: String,
+               @Query("owner_id") ownerId: Long,
+               @Query("item_id") itemId: Long,
+               @Query("access_token") token: String,
+               @Query("version") version: String = API_VERSION): LiveData<ApiResponse<Int>>
 
 }

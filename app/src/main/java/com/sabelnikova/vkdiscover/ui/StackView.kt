@@ -67,6 +67,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (!swipeEnabled) return false
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastX = event.x
@@ -90,7 +91,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
                         if (delta.absoluteValue > 10) {
                             currentDirection = if (delta > 0) SwipeDirection.RIGHT else SwipeDirection.LEFT
                             currentDirection?.let { direction -> onStartSwipe?.invoke(currentIndex, direction) }
-                            frontView?.translationX = delta * 1.3f
+                            frontView?.translationX = delta * 1.2f
                             frontView?.rotation = delta / 40
                             frontView?.invalidate()
                             if (frontView?.translationX?.absoluteValue ?: 0f >= 400) {
@@ -112,7 +113,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
         backView?.animate()?.scaleX(1f)
         backView?.animate()?.scaleY(1f)
         frontView?.animate()?.rotation(8f * sign)
-        val swipeAnimation = ObjectAnimator.ofFloat(frontView, "translationX", sign * windowSize.x * 1.2f)
+        val swipeAnimation = ObjectAnimator.ofFloat(frontView, "translationX", sign * windowSize.x * 1f)
         swipeAnimation.addListener(object : Animator.AnimatorListener {
             override fun onAnimationRepeat(animation: Animator?) {
             }
@@ -134,6 +135,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
         })
         swipeAnimation?.start()
         lastX = null
+        currentDirection = null
     }
 
     abstract class Adapter<T> {

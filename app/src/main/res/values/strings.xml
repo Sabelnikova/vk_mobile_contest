@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Vk Discover</string>
-    <string name="vk_id">6746336</string>
+    <integer name="com_vk_sdk_AppId">6746336</integer>
+
     <string name="skip">Пропустить</string>
     <string name="like">Мне нравится</string>
     <string name="expand">Еще</string>
