@@ -22,6 +22,10 @@ class VkRepository @Inject constructor(private val apiService: ApiService,
 
     fun getToken(): String = sharedPreferences.getString(USER_TOKEN, "")
 
+    fun clearToken() = sharedPreferences.edit()
+            .remove(USER_TOKEN)
+            .commit()
+
     fun saveToken(token: String) = sharedPreferences.edit()
             .putString(USER_TOKEN, token)
             .apply()

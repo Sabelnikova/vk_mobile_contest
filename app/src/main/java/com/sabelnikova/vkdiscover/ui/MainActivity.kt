@@ -5,6 +5,8 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.view.View
 import android.widget.TextView
 import com.sabelnikova.vkdiscover.R
 import com.sabelnikova.vkdiscover.di.android.viewmodel.ViewModelFactory
@@ -34,10 +36,10 @@ class MainActivity : DaggerAppCompatActivity() {
             }
 
             override fun onError(error: VKError) {
-                //todo show error
+                showError(error.errorMessage)
             }
         })
-        //todo if !res show error
+        if (!res) showError(getString(R.string.vk_auth_error))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,24 +47,23 @@ class MainActivity : DaggerAppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         mainViewModel = getViewModel(MainViewModel::class.java)
-        stack.adapter = discoverItemsAdapter
-
-        mainViewModel.postsLiveData.observe(this, Observer {
-            it?.let {
-                it.body?.items?.let { it1 -> discoverItemsAdapter.addItems(it1) }
-            }
-        })
-        mainViewModel.loadNext()
-
         if (!mainViewModel.userLoggedIn()) {
             VKSdk.login(this, VKScope.WALL)
         }
 
-        val adapter = TestAdapter()
-        adapter.setItems(listOf("one", "two", "three", "four", "five"))
+        mainViewModel.postsLiveData.observe(this, Observer {
+            it?.let {response ->
+                if (response.isSuccessful) {
+                    it.body?.items?.let { it1 -> discoverItemsAdapter.addItems(it1) }
+                } else {
+                    response.error?.message?.let { message -> showError(message) }
+                }
+                progressBar.visibility = View.GONE
+            }
+        })
+        mainViewModel.loadNext()
 
-//        stack.adapter = adapter
-        setTest()
+        setupStackView()
 
         skipBtn.setOnClickListener {
             stack.swipe(StackView.SwipeDirection.LEFT)
@@ -70,16 +71,6 @@ class MainActivity : DaggerAppCompatActivity() {
 
         likeBtn.setOnClickListener {
             stack.swipe(StackView.SwipeDirection.RIGHT)
-        }
-    }
-
-    private fun setTest() {
-        discoverItemsAdapter.onExpandView = {
-            stack.swipeEnabled = false
-        }
-
-        discoverItemsAdapter.onHideView = {
-            stack.swipeEnabled = true
         }
 
         stack.onStartSwipe = { _, direction ->
@@ -105,6 +96,21 @@ class MainActivity : DaggerAppCompatActivity() {
         }
     }
 
+    private fun setupStackView() {
+        stack.adapter = discoverItemsAdapter
+
+        discoverItemsAdapter.onExpandView = {
+            stack.swipeEnabled = false
+        }
+
+        discoverItemsAdapter.onHideView = {
+            stack.swipeEnabled = true
+        }
+    }
+
+    private fun showError(message: String) {
+        Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
+    }
     private fun <T : ViewModel> getViewModel(aClass: Class<T>): T {
         return ViewModelProviders.of(this, viewModelFactory)
                 .get(aClass)
