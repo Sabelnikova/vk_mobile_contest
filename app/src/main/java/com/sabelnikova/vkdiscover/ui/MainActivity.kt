@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.view.View
-import android.widget.TextView
 import com.sabelnikova.vkdiscover.R
 import com.sabelnikova.vkdiscover.di.android.viewmodel.ViewModelFactory
 import com.vk.sdk.VKAccessToken
@@ -32,7 +31,7 @@ class MainActivity : DaggerAppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         val res = VKSdk.onActivityResult(requestCode, resultCode, data, object : VKCallback<VKAccessToken> {
             override fun onResult(res: VKAccessToken) {
-               mainViewModel.saveToken(res.accessToken)
+                mainViewModel.saveToken(res.accessToken)
             }
 
             override fun onError(error: VKError) {
@@ -52,7 +51,7 @@ class MainActivity : DaggerAppCompatActivity() {
         }
 
         mainViewModel.postsLiveData.observe(this, Observer {
-            it?.let {response ->
+            it?.let { response ->
                 if (response.isSuccessful) {
                     it.body?.items?.let { it1 -> discoverItemsAdapter.addItems(it1) }
                 } else {
@@ -73,16 +72,33 @@ class MainActivity : DaggerAppCompatActivity() {
             stack.swipe(StackView.SwipeDirection.RIGHT)
         }
 
-        stack.onStartSwipe = { _, direction ->
-            val view: TextView? = when (direction) {
-                StackView.SwipeDirection.LEFT -> (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
-                StackView.SwipeDirection.RIGHT -> (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
+        stack.onSwipeProgress = { progress, direction ->
+            val appearingView: View?
+            val disappearaingView: View?
+            when (direction) {
+                StackView.SwipeDirection.LEFT -> {
+                    appearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
+                    disappearaingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
+                }
+                StackView.SwipeDirection.RIGHT -> {
+                    appearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
+                    disappearaingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
+                }
             }
-            view?.animate()?.alpha(1f)
+            appearingView?.alpha = progress*2
+            disappearaingView?.apply {
+                if (progress <= 0.1){
+                    alpha = 0f
+                } else {
+                    if (alpha != 0f) {
+                        alpha = progress / 2
+                    }
+                }
+            }
         }
 
         stack.onStopSwipe = { _, direction ->
-            val view: TextView? = when (direction) {
+            val view: View? = when (direction) {
                 StackView.SwipeDirection.LEFT -> (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
                 StackView.SwipeDirection.RIGHT -> (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
             }
@@ -90,7 +106,7 @@ class MainActivity : DaggerAppCompatActivity() {
         }
 
         stack.onItemAppearInBack = {
-            if (discoverItemsAdapter.getItemsCount() - it < 3){
+            if (discoverItemsAdapter.getItemsCount() - it < 3) {
                 mainViewModel.loadNext()
             }
         }
@@ -111,6 +127,7 @@ class MainActivity : DaggerAppCompatActivity() {
     private fun showError(message: String) {
         Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
     }
+
     private fun <T : ViewModel> getViewModel(aClass: Class<T>): T {
         return ViewModelProviders.of(this, viewModelFactory)
                 .get(aClass)

@@ -15,6 +15,10 @@ import kotlin.math.absoluteValue
 
 class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, attrs) {
 
+    companion object {
+        const val MAX_TRANSLATION_BEFORE_SWIPE = 400
+    }
+
     enum class SwipeDirection {
         LEFT,
         RIGHT
@@ -59,6 +63,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
 
     private var currentDirection: SwipeDirection? = null
 
+    var onSwipeProgress: ((progress: Float, direction: SwipeDirection) -> Unit)? = null
     var onStartSwipe: ((position: Int, direction: SwipeDirection) -> Unit)? = null
     var onStopSwipe: ((position: Int, direction: SwipeDirection) -> Unit)? = null
     var onItemAppearInBack: ((position: Int) -> Unit)? = null
@@ -97,8 +102,11 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
                             frontView?.translationX = delta * 1.2f
                             frontView?.rotation = delta / 40
                             frontView?.invalidate()
-                            if (frontView?.translationX?.absoluteValue ?: 0f >= 400) {
+                            if (frontView?.translationX?.absoluteValue ?: 0f >= MAX_TRANSLATION_BEFORE_SWIPE) {
                                 swipe(sign)
+                            }
+                            currentDirection?.let {
+                                onSwipeProgress?.invoke(((frontView?.translationX ?: 0f) / MAX_TRANSLATION_BEFORE_SWIPE).absoluteValue, it)
                             }
                         }
 
