@@ -1,7 +1,6 @@
 package com.sabelnikova.vkdiscover.ui
 
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
@@ -45,7 +44,8 @@ class MainActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mainViewModel = getViewModel(MainViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(MainViewModel::class.java)
         if (!mainViewModel.userLoggedIn()) {
             VKSdk.login(this, VKScope.WALL)
         }
@@ -53,7 +53,7 @@ class MainActivity : DaggerAppCompatActivity() {
         mainViewModel.postsLiveData.observe(this, Observer {
             it?.let { response ->
                 if (response.isSuccessful) {
-                    it.body?.items?.let { it1 -> discoverItemsAdapter.addItems(it1) }
+                    it.body?.items?.let { items -> discoverItemsAdapter.addItems(items) }
                 } else {
                     response.error?.message?.let { message -> showError(message) }
                 }
@@ -71,23 +71,46 @@ class MainActivity : DaggerAppCompatActivity() {
         likeBtn.setOnClickListener {
             stack.swipe(StackView.SwipeDirection.RIGHT)
         }
+    }
+
+    private fun setupStackView() {
+        stack.adapter = discoverItemsAdapter
+
+        discoverItemsAdapter.onExpandView = {
+            stack.swipeEnabled = false
+        }
+
+        discoverItemsAdapter.onHideView = {
+            stack.swipeEnabled = true
+        }
+
+        stack.onSwipeCompleted = { position, direction ->
+            when (direction) {
+                StackView.SwipeDirection.LEFT -> {
+                    ignorePost(position)
+                }
+                StackView.SwipeDirection.RIGHT -> {
+                    likePost(position)
+                }
+            }
+        }
 
         stack.onSwipeProgress = { progress, direction ->
             val appearingView: View?
-            val disappearaingView: View?
+            val disappearingView: View?
             when (direction) {
                 StackView.SwipeDirection.LEFT -> {
                     appearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
-                    disappearaingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
+                    disappearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
                 }
                 StackView.SwipeDirection.RIGHT -> {
                     appearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.likeTv
-                    disappearaingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
+                    disappearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
                 }
             }
-            appearingView?.alpha = progress*2
-            disappearaingView?.apply {
-                if (progress <= 0.1){
+            appearingView?.alpha = progress * 2
+            disappearingView?.apply {
+                if (progress <= 0.1) {
                     alpha = 0f
                 } else {
                     if (alpha != 0f) {
@@ -112,25 +135,24 @@ class MainActivity : DaggerAppCompatActivity() {
         }
     }
 
-    private fun setupStackView() {
-        stack.adapter = discoverItemsAdapter
+    private fun likePost(position: Int) {
+        mainViewModel.like(discoverItemsAdapter.getItem(position)).observe(this, Observer {
+            if (it?.isSuccessful != true) {
+                it?.error?.message?.let { message -> showError(message) }
+            }
+        })
+    }
 
-        discoverItemsAdapter.onExpandView = {
-            stack.swipeEnabled = false
-        }
-
-        discoverItemsAdapter.onHideView = {
-            stack.swipeEnabled = true
-        }
+    private fun ignorePost(position: Int) {
+        mainViewModel.ignore(discoverItemsAdapter.getItem(position)).observe(this, Observer {
+            if (it?.isSuccessful != true) {
+                it?.error?.message?.let { message -> showError(message) }
+            }
+        })
     }
 
     private fun showError(message: String) {
         Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
-    }
-
-    private fun <T : ViewModel> getViewModel(aClass: Class<T>): T {
-        return ViewModelProviders.of(this, viewModelFactory)
-                .get(aClass)
     }
 }
 

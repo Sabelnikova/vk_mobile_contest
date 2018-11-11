@@ -52,6 +52,8 @@ class DiscoverItemsAdapter : StackView.Adapter() {
         addItems(items)
     }
 
+    fun getItem(position: Int) = items[position]
+
     inner class DiscoverItemViewHolder(view: View) : StackView.ViewHolder(view) {
 
         private val scrollView: LockableScrollView = view.findViewById(R.id.scrollView)

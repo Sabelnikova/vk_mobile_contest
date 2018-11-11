@@ -66,13 +66,14 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
     var onSwipeProgress: ((progress: Float, direction: SwipeDirection) -> Unit)? = null
     var onStartSwipe: ((position: Int, direction: SwipeDirection) -> Unit)? = null
     var onStopSwipe: ((position: Int, direction: SwipeDirection) -> Unit)? = null
+    var onSwipeCompleted: ((position: Int, direction: SwipeDirection) -> Unit)? = null
     var onItemAppearInBack: ((position: Int) -> Unit)? = null
 
-    fun swipe(direction: SwipeDirection) =
-            when (direction) {
-                SwipeDirection.LEFT -> swipe(-1)
-                SwipeDirection.RIGHT -> swipe(1)
-            }
+    fun swipe(direction: SwipeDirection) {
+        currentDirection = direction
+        swipe()
+    }
+
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (!swipeEnabled) return false
@@ -100,10 +101,10 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
                             currentDirection = if (delta > 0) SwipeDirection.RIGHT else SwipeDirection.LEFT
                             currentDirection?.let { direction -> onStartSwipe?.invoke(currentIndex, direction) }
                             frontView?.translationX = delta * 1.2f
-                            frontView?.rotation = delta / 40
+                            frontView?.rotation = delta / 100
                             frontView?.invalidate()
                             if (frontView?.translationX?.absoluteValue ?: 0f >= MAX_TRANSLATION_BEFORE_SWIPE) {
-                                swipe(sign)
+                                swipe()
                             }
                             currentDirection?.let {
                                 onSwipeProgress?.invoke(((frontView?.translationX ?: 0f) / MAX_TRANSLATION_BEFORE_SWIPE).absoluteValue, it)
@@ -141,13 +142,19 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
         backViewHolder = temp
     }
 
-    private fun swipe(sign: Int) {
+    private fun swipe() {
         val windowSize = Point()
         (context as? Activity)?.windowManager?.defaultDisplay?.getSize(windowSize)
 
+        val sign = when (currentDirection) {
+            SwipeDirection.LEFT -> -1
+            SwipeDirection.RIGHT ->  1
+            else -> 0
+        }
+
         backView?.animate()?.scaleX(1f)
         backView?.animate()?.scaleY(1f)
-        val rotationAnimation = ObjectAnimator.ofFloat(frontView, "rotation", sign * 8f)
+        val rotationAnimation = ObjectAnimator.ofFloat(frontView, "rotation", sign * 5f)
         val swipeAnimation = ObjectAnimator.ofFloat(frontView, "translationX", sign * windowSize.x * 1f)
 
         val swipeSet = AnimatorSet()
@@ -172,6 +179,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
 
         })
         swipeSet.start()
+        currentDirection?.let { onSwipeCompleted?.invoke(currentIndex, it) }
         lastX = null
         currentDirection = null
     }
