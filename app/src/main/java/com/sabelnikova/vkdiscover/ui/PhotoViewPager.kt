@@ -8,6 +8,8 @@ import android.view.MotionEvent
 
 class PhotoViewPager : ViewPager {
 
+    var enableSidesClick = true
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -18,7 +20,7 @@ class PhotoViewPager : ViewPager {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN) {
+        if (event.action == MotionEvent.ACTION_DOWN && enableSidesClick) {
             when {
                 event.x < width / 4 -> {
                     currentItem -= 1

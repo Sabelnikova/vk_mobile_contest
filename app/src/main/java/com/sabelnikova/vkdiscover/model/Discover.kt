@@ -21,7 +21,9 @@ data class Attachment(@SerializedName("type") val type: String,
                       @SerializedName("link") val link: Link?)
 
 data class Photo(@SerializedName("id") val id: Long,
-                 @SerializedName("sizes") val sizes: List<PhotoSize>)
+                 @SerializedName("sizes") val sizes: List<PhotoSize>) {
+    fun getPhotoUrl() = sizes.find { it.type == "y" || it.type == "x" }?.url
+}
 
 data class PhotoSize(@SerializedName("type") val type: String,
                      @SerializedName("url") val url: String,

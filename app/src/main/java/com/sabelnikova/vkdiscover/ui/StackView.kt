@@ -74,7 +74,6 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
         swipe()
     }
 
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (!swipeEnabled) return false
         when (event?.action) {
@@ -107,7 +106,8 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
                                 swipe()
                             }
                             currentDirection?.let {
-                                onSwipeProgress?.invoke(((frontView?.translationX ?: 0f) / MAX_TRANSLATION_BEFORE_SWIPE).absoluteValue, it)
+                                onSwipeProgress?.invoke(((frontView?.translationX
+                                        ?: 0f) / MAX_TRANSLATION_BEFORE_SWIPE).absoluteValue, it)
                             }
                         }
 
@@ -148,7 +148,7 @@ class StackView(context: Context?, attrs: AttributeSet?) : FrameLayout(context, 
 
         val sign = when (currentDirection) {
             SwipeDirection.LEFT -> -1
-            SwipeDirection.RIGHT ->  1
+            SwipeDirection.RIGHT -> 1
             else -> 0
         }
 

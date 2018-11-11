@@ -31,10 +31,11 @@ class MainActivity : DaggerAppCompatActivity() {
         val res = VKSdk.onActivityResult(requestCode, resultCode, data, object : VKCallback<VKAccessToken> {
             override fun onResult(res: VKAccessToken) {
                 mainViewModel.saveToken(res.accessToken)
+                loadData()
             }
 
             override fun onError(error: VKError) {
-                showError(error.errorMessage)
+                showError(getString(R.string.vk_auth_error))
             }
         })
         if (!res) showError(getString(R.string.vk_auth_error))
@@ -48,19 +49,9 @@ class MainActivity : DaggerAppCompatActivity() {
                 .get(MainViewModel::class.java)
         if (!mainViewModel.userLoggedIn()) {
             VKSdk.login(this, VKScope.WALL)
+        } else {
+            loadData()
         }
-
-        mainViewModel.postsLiveData.observe(this, Observer {
-            it?.let { response ->
-                if (response.isSuccessful) {
-                    it.body?.items?.let { items -> discoverItemsAdapter.addItems(items) }
-                } else {
-                    response.error?.message?.let { message -> showError(message) }
-                }
-                progressBar.visibility = View.GONE
-            }
-        })
-        mainViewModel.loadNext()
 
         setupStackView()
 
@@ -70,6 +61,29 @@ class MainActivity : DaggerAppCompatActivity() {
 
         likeBtn.setOnClickListener {
             stack.swipe(StackView.SwipeDirection.RIGHT)
+        }
+    }
+
+    private fun loadData() {
+        mainViewModel.postsLiveData.observe(this, Observer {
+            it?.let { response ->
+                if (response.isSuccessful) {
+                    it.body?.items?.let { items ->
+                        discoverItemsAdapter.addItems(items)
+                        showButtons()
+                    }
+                } else {
+                    response.error?.message?.let { message -> showError(message) }
+                }
+                progressBar.visibility = View.GONE
+            }
+        })
+        mainViewModel.loadNext()
+    }
+
+    private fun showButtons(){
+        if (buttonsLayout.translationY != 0f) {
+            buttonsLayout.animate().translationY(0f)
         }
     }
 

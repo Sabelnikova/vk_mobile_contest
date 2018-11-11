@@ -7,11 +7,10 @@ import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
 import android.support.transition.ChangeBounds
 import android.support.transition.TransitionManager
-import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnticipateOvershootInterpolator
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
@@ -47,11 +46,6 @@ class DiscoverItemsAdapter : StackView.Adapter() {
         notifyDataSet()
     }
 
-    fun setItems(items: List<DiscoverItem>) {
-        this.items.clear()
-        addItems(items)
-    }
-
     fun getItem(position: Int) = items[position]
 
     inner class DiscoverItemViewHolder(view: View) : StackView.ViewHolder(view) {
@@ -64,7 +58,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
         private val expandTv: TextView = view.findViewById(R.id.expandTv)
         private val expandIv: ImageView = view.findViewById(R.id.expandIv)
 
-        private val viewPager: ViewPager = view.findViewById(R.id.photoViewPager)
+        private val viewPager: PhotoViewPager = view.findViewById(R.id.photoViewPager)
         private val tabLayout: TabLayout = view.findViewById(R.id.photoTabLayout)
 
         private val linkLayout: ViewGroup = view.findViewById(R.id.include)
@@ -133,7 +127,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
             } ?: run {
                 linkLayout.visibility = View.GONE
                 val photos = attachments.mapNotNull {
-                    it.photo?.sizes?.find { it.type == "y" || it.type == "x" }?.url ?: it.video?.url
+                    it.photo?.getPhotoUrl() ?: it.video?.url
                 }
                 if (photos.isEmpty()) {
                     viewPager.visibility = View.GONE
@@ -141,8 +135,10 @@ class DiscoverItemsAdapter : StackView.Adapter() {
                 } else {
                     if (photos.size == 1) {
                         tabLayout.visibility = View.GONE
+                        viewPager.enableSidesClick = false
                     } else {
                         tabLayout.visibility = View.VISIBLE
+                        viewPager.enableSidesClick = true
                     }
                     viewPager.visibility = View.VISIBLE
                     val adapter = PhotoViewPagerAdapter()
@@ -156,18 +152,20 @@ class DiscoverItemsAdapter : StackView.Adapter() {
         private fun animate(expanded: Boolean) {
             val constraintSet = ConstraintSet()
             if (expanded) {
-                constraintSet.clone(view.context, R.layout.item_post_hidden)
+                constraintSet.clone(container)
+                constraintSet.constrainHeight(R.id.textTv, ConstraintSet.MATCH_CONSTRAINT)
                 scrollView.scrollable = false
                 expandIv.rotation = 0f
                 expandTv.setText(R.string.expand)
             } else {
-                constraintSet.clone(view.context, R.layout.item_post_expanded)
+                constraintSet.clone(container)
+                constraintSet.constrainHeight(R.id.textTv, ConstraintSet.WRAP_CONTENT)
                 scrollView.scrollable = true
                 expandIv.rotation = 180f
                 expandTv.setText(R.string.hide)
             }
             val transition = ChangeBounds()
-            transition.interpolator = AnticipateOvershootInterpolator(1.0f)
+            transition.interpolator = AccelerateDecelerateInterpolator()
             transition.duration = 800
 
             TransitionManager.beginDelayedTransition(container, transition)
