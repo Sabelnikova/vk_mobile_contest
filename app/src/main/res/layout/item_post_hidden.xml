@@ -52,6 +52,17 @@
         app:layout_constraintTop_toBottomOf="@+id/userNameTv"
         tools:text="14 окт. в 22:34" />
 
+    <include
+        android:id="@+id/include"
+        layout="@layout/layout_link_attachment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/photoViewPager" />
+
     <com.sabelnikova.vkdiscover.ui.PhotoViewPager
         android:id="@+id/photoViewPager"
         android:layout_width="match_parent"
@@ -98,7 +109,7 @@
         app:layout_constraintBottom_toTopOf="@+id/expandLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photoViewPager"
+        app:layout_constraintTop_toBottomOf="@+id/include"
         tools:text="test" />
 
     <LinearLayout

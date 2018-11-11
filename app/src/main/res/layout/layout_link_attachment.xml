@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_elevation16"
+    android:orientation="vertical"
+    android:paddingStart="32dp"
+    android:paddingTop="32dp"
+    android:paddingEnd="32dp"
+    android:paddingBottom="44dp">
+
+    <TextView
+        android:id="@+id/titleTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
+        android:textColor="@color/user_name_text_color"
+        tools:text="Греф рассказал о сокращениях в Сбербанке из-за искусственного интеллекта" />
+
+    <TextView
+        android:id="@+id/captionTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:textColor="@color/date_text_color"
+        tools:text="www.rbc.ru" />
+</LinearLayout>

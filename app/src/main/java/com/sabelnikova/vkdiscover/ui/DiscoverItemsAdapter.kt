@@ -1,5 +1,7 @@
 package com.sabelnikova.vkdiscover.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
@@ -14,9 +16,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.sabelnikova.vkdiscover.R
+import com.sabelnikova.vkdiscover.model.Attachment
 import com.sabelnikova.vkdiscover.model.DiscoverItem
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class DiscoverItemsAdapter : StackView.Adapter() {
 
@@ -49,33 +53,42 @@ class DiscoverItemsAdapter : StackView.Adapter() {
     }
 
     inner class DiscoverItemViewHolder(view: View) : StackView.ViewHolder(view) {
-        val tv: TextView = view.findViewById(R.id.textTv)
-        val viewPager: ViewPager = view.findViewById(R.id.photoViewPager)
-        val tabLayout: TabLayout = view.findViewById(R.id.photoTabLayout)
-        val userNameTv: TextView = view.findViewById(R.id.userNameTv)
-        val dateTv: TextView = view.findViewById(R.id.dateTv)
-        val avatarIv: ImageView = view.findViewById(R.id.avatarIv)
-        val scrollView: LockableScrollView = view.findViewById(R.id.scrollView)
-        val expandView: ViewGroup = view.findViewById(R.id.expandLayout)
-        val expandTv: TextView = view.findViewById(R.id.expandTv)
-        val expandIv: ImageView = view.findViewById(R.id.expandIv)
-        val container: ConstraintLayout = view.findViewById(R.id.container)
+
+        private val scrollView: LockableScrollView = view.findViewById(R.id.scrollView)
+        private val container: ConstraintLayout = view.findViewById(R.id.container)
+
+        private val textTv: TextView = view.findViewById(R.id.textTv)
+        private val expandView: ViewGroup = view.findViewById(R.id.expandLayout)
+        private val expandTv: TextView = view.findViewById(R.id.expandTv)
+        private val expandIv: ImageView = view.findViewById(R.id.expandIv)
+
+        private val viewPager: ViewPager = view.findViewById(R.id.photoViewPager)
+        private val tabLayout: TabLayout = view.findViewById(R.id.photoTabLayout)
+
+        private val linkLayout: ViewGroup = view.findViewById(R.id.include)
+        private val linkTitleTv: TextView = view.findViewById(R.id.titleTv)
+        private val linkCaptionTv: TextView = view.findViewById(R.id.captionTv)
+
+        private val userNameTv: TextView = view.findViewById(R.id.userNameTv)
+        private val dateTv: TextView = view.findViewById(R.id.dateTv)
+        private val avatarIv: ImageView = view.findViewById(R.id.avatarIv)
+
         val skipTv: TextView = view.findViewById(R.id.skipTv)
         val likeTv: TextView = view.findViewById(R.id.likeTv)
 
         fun bindView(discoverItem: DiscoverItem) {
             resetView()
 
-            var scrollViewPrepared = false
+            var expandViewPrepared = false
             var expanded = false
 
             view.viewTreeObserver.addOnGlobalLayoutListener {
 
-                if (!scrollViewPrepared) {
-                    if (!textFits(tv)) {
+                if (!expandViewPrepared) {
+                    if (!textFits(textTv)) {
                         expandView.visibility = View.VISIBLE
                     }
-                    scrollViewPrepared = true
+                    expandViewPrepared = true
                 }
             }
 
@@ -84,30 +97,61 @@ class DiscoverItemsAdapter : StackView.Adapter() {
                 expanded = !expanded
             }
 
-            tv.text = discoverItem.text
-
+            textTv.text = discoverItem.text
             userNameTv.text = discoverItem.owner?.getName()
             dateTv.text = dateFormat.format(Date(discoverItem.date))
             Glide.with(view.context)
                     .load(discoverItem.owner?.getPhoto())
                     .into(avatarIv)
 
-            val adapter = PhotoViewPagerAdapter()
-            discoverItem.attachments?.let {
-                adapter.setData(discoverItem.attachments.mapNotNull {
-                    it.photo?.sizes?.find { it.type == "y" }?.url ?: it.video?.url
-                })
-                viewPager.adapter = adapter
-                tabLayout.setupWithViewPager(viewPager)
-                viewPager.visibility = View.VISIBLE
-                tabLayout.visibility = View.VISIBLE
-            } ?: run {
+            setupAttachments(discoverItem.attachments)
+        }
+
+        private fun setupAttachments(attachments: List<Attachment>?) {
+            if (attachments == null) {
                 viewPager.visibility = View.GONE
                 tabLayout.visibility = View.GONE
+                linkLayout.visibility = View.GONE
+                return
+            }
+
+            val link = attachments.asSequence().mapNotNull { it.link }.firstOrNull()
+
+            link?.let { link ->
+                viewPager.visibility = View.GONE
+                tabLayout.visibility = View.GONE
+
+                linkCaptionTv.text = link.caption
+                linkTitleTv.text = link.title
+                linkLayout.setOnClickListener {
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
+                    view.context.startActivity(browserIntent)
+                }
+                linkLayout.visibility = View.VISIBLE
+            } ?: run {
+                linkLayout.visibility = View.GONE
+                val photos = attachments.mapNotNull {
+                    it.photo?.sizes?.find { it.type == "y" || it.type == "x" }?.url ?: it.video?.url
+                }
+                if (photos.isEmpty()) {
+                    viewPager.visibility = View.GONE
+                    tabLayout.visibility = View.GONE
+                } else {
+                    if (photos.size == 1) {
+                        tabLayout.visibility = View.GONE
+                    } else {
+                        tabLayout.visibility = View.VISIBLE
+                    }
+                    viewPager.visibility = View.VISIBLE
+                    val adapter = PhotoViewPagerAdapter()
+                    adapter.setData(photos)
+                    viewPager.adapter = adapter
+                    tabLayout.setupWithViewPager(viewPager)
+                }
             }
         }
 
-        private fun animate(expanded: Boolean){
+        private fun animate(expanded: Boolean) {
             val constraintSet = ConstraintSet()
             if (expanded) {
                 constraintSet.clone(view.context, R.layout.item_post_hidden)
@@ -128,7 +172,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
             constraintSet.applyTo(container)
         }
 
-        private fun resetView(){
+        private fun resetView() {
             val constraintSet = ConstraintSet()
             constraintSet.clone(view.context, R.layout.item_post_hidden)
             constraintSet.applyTo(container)

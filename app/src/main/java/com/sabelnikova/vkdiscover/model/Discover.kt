@@ -17,16 +17,21 @@ data class DiscoverItem(@SerializedName("type") val type: String,
 
 data class Attachment(@SerializedName("type") val type: String,
                       @SerializedName("photo") val photo: Photo?,
-                      @SerializedName("video") val video: Video?)
+                      @SerializedName("video") val video: Video?,
+                      @SerializedName("link") val link: Link?)
 
 data class Photo(@SerializedName("id") val id: Long,
-                 @SerializedName("sizes") val sizes: List<PhotoSize>,
-                 @SerializedName("access_key") val accessKey: String)
+                 @SerializedName("sizes") val sizes: List<PhotoSize>)
 
 data class PhotoSize(@SerializedName("type") val type: String,
                      @SerializedName("url") val url: String,
                      @SerializedName("width") val width: Int,
                      @SerializedName("height") val height: Int)
 
-data class Video(@SerializedName("id") val id: Long,
-                 @SerializedName("photo_800") val url: String)
+data class Video(@SerializedName("photo_800") val url: String)
+
+data class Link(@SerializedName("id") val id: Long,
+                @SerializedName("photo") val photo: Photo?,
+                @SerializedName("url") val url: String,
+                @SerializedName("caption") val caption: String,
+                @SerializedName("title") val title: String)
