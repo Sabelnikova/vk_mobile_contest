@@ -2,6 +2,7 @@ package com.sabelnikova.vkdiscover.ui
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
@@ -19,7 +20,6 @@ import com.sabelnikova.vkdiscover.model.Attachment
 import com.sabelnikova.vkdiscover.model.DiscoverItem
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 class DiscoverItemsAdapter : StackView.Adapter() {
 
@@ -95,7 +95,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
 
             textTv.text = discoverItem.text
             userNameTv.text = discoverItem.owner?.getName()
-            dateTv.text = dateFormat.format(Date(discoverItem.date))
+            dateTv.text = dateFormat.format(Date(discoverItem.date * 1000))
             Glide.with(view.context)
                     .load(discoverItem.owner?.getPhoto())
                     .into(avatarIv)
@@ -151,30 +151,34 @@ class DiscoverItemsAdapter : StackView.Adapter() {
 
         private fun animate(expanded: Boolean) {
             val constraintSet = ConstraintSet()
+            val transition = ChangeBounds()
+            transition.interpolator = AccelerateDecelerateInterpolator()
+            transition.duration = 500
             if (expanded) {
                 constraintSet.clone(container)
                 constraintSet.constrainHeight(R.id.textTv, ConstraintSet.MATCH_CONSTRAINT)
                 scrollView.scrollable = false
                 expandIv.rotation = 0f
                 expandTv.setText(R.string.expand)
+                scrollView.smoothScrollTo(0, 0)
+                Handler().postDelayed({
+                    TransitionManager.beginDelayedTransition(container, transition)
+                    constraintSet.applyTo(container)
+                }, 300)
             } else {
                 constraintSet.clone(container)
                 constraintSet.constrainHeight(R.id.textTv, ConstraintSet.WRAP_CONTENT)
                 scrollView.scrollable = true
                 expandIv.rotation = 180f
                 expandTv.setText(R.string.hide)
+                TransitionManager.beginDelayedTransition(container, transition)
+                constraintSet.applyTo(container)
             }
-            val transition = ChangeBounds()
-            transition.interpolator = AccelerateDecelerateInterpolator()
-            transition.duration = 800
-
-            TransitionManager.beginDelayedTransition(container, transition)
-            constraintSet.applyTo(container)
         }
 
         private fun resetView() {
             val constraintSet = ConstraintSet()
-            constraintSet.clone(view.context, R.layout.item_post_hidden)
+            constraintSet.clone(view.context, R.layout.layout_post)
             constraintSet.applyTo(container)
 
             scrollView.scrollable = false

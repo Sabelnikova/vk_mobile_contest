@@ -8,5 +8,5 @@
     android:clipToPadding="false"
     android:paddingBottom="@dimen/post_bottom_margin">
 
-    <include layout="@layout/item_post_hidden" />
+    <include layout="@layout/layout_post" />
 </com.sabelnikova.vkdiscover.ui.LockableScrollView>

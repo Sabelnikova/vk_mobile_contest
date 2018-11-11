@@ -7,4 +7,5 @@
     <string name="expand">Еще</string>
     <string name="hide">Свернуть</string>
     <string name="vk_auth_error">Ошибка авторизации</string>
+    <string name="auth">Авторизоваться</string>
 </resources>

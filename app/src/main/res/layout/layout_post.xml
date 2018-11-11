@@ -29,13 +29,17 @@
 
     <TextView
         android:id="@+id/userNameTv"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:ellipsize="end"
         android:fontFamily="@font/roboto_medium"
+        android:maxLines="1"
         android:textColor="@color/user_name_text_color"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/view"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Иван Иванов" />

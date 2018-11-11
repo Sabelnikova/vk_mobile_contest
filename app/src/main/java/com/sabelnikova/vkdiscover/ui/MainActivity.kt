@@ -31,14 +31,19 @@ class MainActivity : DaggerAppCompatActivity() {
         val res = VKSdk.onActivityResult(requestCode, resultCode, data, object : VKCallback<VKAccessToken> {
             override fun onResult(res: VKAccessToken) {
                 mainViewModel.saveToken(res.accessToken)
+                authBtn.visibility = View.GONE
                 loadData()
             }
 
             override fun onError(error: VKError) {
                 showError(getString(R.string.vk_auth_error))
+                authBtn.visibility = View.VISIBLE
             }
         })
-        if (!res) showError(getString(R.string.vk_auth_error))
+        if (!res){
+            showError(getString(R.string.vk_auth_error))
+            authBtn.visibility = View.VISIBLE
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,9 +67,14 @@ class MainActivity : DaggerAppCompatActivity() {
         likeBtn.setOnClickListener {
             stack.swipe(StackView.SwipeDirection.RIGHT)
         }
+
+        authBtn.setOnClickListener {
+            VKSdk.login(this, VKScope.WALL)
+        }
     }
 
     private fun loadData() {
+        progressBar.visibility = View.VISIBLE
         mainViewModel.postsLiveData.observe(this, Observer {
             it?.let { response ->
                 if (response.isSuccessful) {
