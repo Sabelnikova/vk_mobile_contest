@@ -1,13 +1,15 @@
 package com.sabelnikova.vkdiscover.ui
 
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
+import android.support.transition.ChangeBounds
+import android.support.transition.TransitionManager
 import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.Transformation
-import android.widget.FrameLayout
+import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
@@ -57,26 +59,20 @@ class DiscoverItemsAdapter : StackView.Adapter() {
         val expandView: ViewGroup = view.findViewById(R.id.expandLayout)
         val expandTv: TextView = view.findViewById(R.id.expandTv)
         val expandIv: ImageView = view.findViewById(R.id.expandIv)
-        val container: ViewGroup = view.findViewById(R.id.container)
+        val container: ConstraintLayout = view.findViewById(R.id.container)
         val skipTv: TextView = view.findViewById(R.id.skipTv)
         val likeTv: TextView = view.findViewById(R.id.likeTv)
 
         fun bindView(discoverItem: DiscoverItem) {
-            scrollView.scrollable = false
+            resetView()
 
             var scrollViewPrepared = false
             var expanded = false
 
-            skipTv.alpha = 0f
-            likeTv.alpha = 0f
-
             view.viewTreeObserver.addOnGlobalLayoutListener {
-                if (!scrollViewPrepared) {
-                    val childHeight = container.height
-                    val isScrollable = scrollView.height < childHeight
 
-                    if (isScrollable) {
-                        tv.maxLines = 3
+                if (!scrollViewPrepared) {
+                    if (!textFits(tv)) {
                         expandView.visibility = View.VISIBLE
                     }
                     scrollViewPrepared = true
@@ -84,47 +80,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
             }
 
             expandView.setOnClickListener {
-                if (expanded) {
-                    scrollView.smoothScrollTo(0, 0)
-                    onHideView?.invoke()
-                    val newBottomMargin = 200
-                    val a = object : Animation() {
-                        override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
-                            val params = scrollView.layoutParams as FrameLayout.LayoutParams
-                            params.bottomMargin = (newBottomMargin * interpolatedTime).toInt()
-                            scrollView.layoutParams = params
-                            if (interpolatedTime == 1f) {
-                                tv.maxLines = 3
-                                container.setPadding(0, 0, 0, 0)
-                            }
-                        }
-                    }
-                    a.duration = 1000
-                    scrollView.startAnimation(a)
-
-                    scrollView.scrollable = false
-                    expandIv.rotation = 0f
-                    expandTv.setText(R.string.expand)
-
-                } else {
-                    tv.maxLines = Int.MAX_VALUE
-                    onExpandView?.invoke()
-                    val newBottomMargin = 0
-                    val a = object : Animation() {
-                        override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
-                            val params = scrollView.layoutParams as FrameLayout.LayoutParams
-                            params.bottomMargin = (newBottomMargin * interpolatedTime).toInt()
-                            scrollView.layoutParams = params
-                        }
-                    }
-                    a.duration = 1000
-                    scrollView.startAnimation(a)
-                    container.setPadding(0, 0, 0, 200)
-
-                    scrollView.scrollable = true
-                    expandIv.rotation = 180f
-                    expandTv.setText(R.string.hide)
-                }
+                animate(expanded)
                 expanded = !expanded
             }
 
@@ -138,7 +94,9 @@ class DiscoverItemsAdapter : StackView.Adapter() {
 
             val adapter = PhotoViewPagerAdapter()
             discoverItem.attachments?.let {
-                adapter.setData(discoverItem.attachments.mapNotNull { it.photo?.sizes?.find { it.type == "y" }?.url ?: it.video?.url})
+                adapter.setData(discoverItem.attachments.mapNotNull {
+                    it.photo?.sizes?.find { it.type == "y" }?.url ?: it.video?.url
+                })
                 viewPager.adapter = adapter
                 tabLayout.setupWithViewPager(viewPager)
                 viewPager.visibility = View.VISIBLE
@@ -147,6 +105,47 @@ class DiscoverItemsAdapter : StackView.Adapter() {
                 viewPager.visibility = View.GONE
                 tabLayout.visibility = View.GONE
             }
+        }
+
+        private fun animate(expanded: Boolean){
+            val constraintSet = ConstraintSet()
+            if (expanded) {
+                constraintSet.clone(view.context, R.layout.item_post_hidden)
+                scrollView.scrollable = false
+                expandIv.rotation = 0f
+                expandTv.setText(R.string.expand)
+            } else {
+                constraintSet.clone(view.context, R.layout.item_post_expanded)
+                scrollView.scrollable = true
+                expandIv.rotation = 180f
+                expandTv.setText(R.string.hide)
+            }
+            val transition = ChangeBounds()
+            transition.interpolator = AnticipateOvershootInterpolator(1.0f)
+            transition.duration = 800
+
+            TransitionManager.beginDelayedTransition(container, transition)
+            constraintSet.applyTo(container)
+        }
+
+        private fun resetView(){
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(view.context, R.layout.item_post_hidden)
+            constraintSet.applyTo(container)
+
+            scrollView.scrollable = false
+
+            expandIv.rotation = 0f
+            expandTv.setText(R.string.expand)
+            expandView.visibility = View.GONE
+
+            skipTv.alpha = 0f
+            likeTv.alpha = 0f
+        }
+
+        private fun textFits(textView: TextView): Boolean {
+            val textHeight = textView.lineCount * textView.lineHeight
+            return textHeight <= textView.height
         }
     }
 }
