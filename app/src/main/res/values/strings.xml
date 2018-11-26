@@ -8,4 +8,5 @@
     <string name="hide">Свернуть</string>
     <string name="vk_auth_error">Ошибка авторизации</string>
     <string name="auth">Авторизоваться</string>
+    <string name="no_more_items">Посты закончились :(</string>
 </resources>

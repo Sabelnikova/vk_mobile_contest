@@ -6,12 +6,10 @@ import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
-import android.support.transition.ChangeBounds
 import android.support.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
@@ -124,11 +122,14 @@ class DiscoverItemsAdapter : StackView.Adapter() {
                     view.context.startActivity(browserIntent)
                 }
                 linkLayout.visibility = View.VISIBLE
+
             } ?: run {
                 linkLayout.visibility = View.GONE
+
                 val photos = attachments.mapNotNull {
                     it.photo?.getPhotoUrl() ?: it.video?.url
                 }
+
                 if (photos.isEmpty()) {
                     viewPager.visibility = View.GONE
                     tabLayout.visibility = View.GONE
@@ -151,9 +152,6 @@ class DiscoverItemsAdapter : StackView.Adapter() {
 
         private fun animate(expanded: Boolean) {
             val constraintSet = ConstraintSet()
-            val transition = ChangeBounds()
-            transition.interpolator = AccelerateDecelerateInterpolator()
-            transition.duration = 500
             if (expanded) {
                 constraintSet.clone(container)
                 constraintSet.constrainHeight(R.id.textTv, ConstraintSet.MATCH_CONSTRAINT)
@@ -162,7 +160,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
                 expandTv.setText(R.string.expand)
                 scrollView.smoothScrollTo(0, 0)
                 Handler().postDelayed({
-                    TransitionManager.beginDelayedTransition(container, transition)
+                    TransitionManager.beginDelayedTransition(container)
                     constraintSet.applyTo(container)
                 }, 300)
             } else {
@@ -171,7 +169,7 @@ class DiscoverItemsAdapter : StackView.Adapter() {
                 scrollView.scrollable = true
                 expandIv.rotation = 180f
                 expandTv.setText(R.string.hide)
-                TransitionManager.beginDelayedTransition(container, transition)
+                TransitionManager.beginDelayedTransition(container)
                 constraintSet.applyTo(container)
             }
         }

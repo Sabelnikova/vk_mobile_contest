@@ -9,12 +9,14 @@ interface ApiService {
 
     companion object {
         const val API_VERSION = "5.87"
+
+        const val EXTENDED = 1
     }
 
     @GET("method/newsfeed.getDiscoverForContestant")
     fun getDiscoverForContestant(@Query("count") count: Int,
                                  @Query("start_from") from: String? = null,
-                                 @Query("extended") extended: Int = 1,
+                                 @Query("extended") extended: Int = EXTENDED,
                                  @Query("access_token") token: String,
                                  @Query("v") version: String = API_VERSION):
             LiveData<ApiResponse<Discover>>

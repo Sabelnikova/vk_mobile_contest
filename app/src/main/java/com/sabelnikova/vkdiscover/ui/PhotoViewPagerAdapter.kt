@@ -16,7 +16,6 @@ class PhotoViewPagerAdapter : PagerAdapter() {
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-
         val imageView = ImageView(container.context)
 
         Glide.with(container.context)

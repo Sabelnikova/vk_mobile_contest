@@ -40,7 +40,7 @@ class MainActivity : DaggerAppCompatActivity() {
                 authBtn.visibility = View.VISIBLE
             }
         })
-        if (!res){
+        if (!res) {
             showError(getString(R.string.vk_auth_error))
             authBtn.visibility = View.VISIBLE
         }
@@ -52,6 +52,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
         mainViewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(MainViewModel::class.java)
+
         if (!mainViewModel.userLoggedIn()) {
             VKSdk.login(this, VKScope.WALL)
         } else {
@@ -79,8 +80,12 @@ class MainActivity : DaggerAppCompatActivity() {
             it?.let { response ->
                 if (response.isSuccessful) {
                     it.body?.items?.let { items ->
-                        discoverItemsAdapter.addItems(items)
-                        showButtons()
+                        if (!items.isEmpty()) {
+                            discoverItemsAdapter.addItems(items)
+                            showButtons()
+                        } else {
+                            emptyStateView.visibility = View.VISIBLE
+                        }
                     }
                 } else {
                     response.error?.message?.let { message -> showError(message) }
@@ -91,7 +96,7 @@ class MainActivity : DaggerAppCompatActivity() {
         mainViewModel.loadNext()
     }
 
-    private fun showButtons(){
+    private fun showButtons() {
         if (buttonsLayout.translationY != 0f) {
             buttonsLayout.animate().translationY(0f)
         }
@@ -132,7 +137,9 @@ class MainActivity : DaggerAppCompatActivity() {
                     disappearingView = (stack?.frontViewHolder as? DiscoverItemsAdapter.DiscoverItemViewHolder)?.skipTv
                 }
             }
+
             appearingView?.alpha = progress * 2
+
             disappearingView?.apply {
                 if (progress <= 0.1) {
                     alpha = 0f

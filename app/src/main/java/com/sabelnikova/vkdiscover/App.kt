@@ -8,7 +8,7 @@ import dagger.android.AndroidInjector
 import dagger.android.support.DaggerApplication
 import javax.inject.Inject
 
-class App: DaggerApplication() {
+class App : DaggerApplication() {
 
     @Inject
     lateinit var vkRepository: VkRepository

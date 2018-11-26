@@ -6,7 +6,7 @@
     android:fillViewport="true"
     android:scrollbars="none"
     android:clipToPadding="false"
-    android:paddingBottom="@dimen/post_bottom_margin">
+    android:paddingBottom="70dp">
 
     <include layout="@layout/layout_post" />
 </com.sabelnikova.vkdiscover.ui.LockableScrollView>

@@ -65,18 +65,18 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photoViewPager" />
+        app:layout_constraintTop_toBottomOf="@+id/dateTv" />
 
     <com.sabelnikova.vkdiscover.ui.PhotoViewPager
         android:id="@+id/photoViewPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:background="#F0F0F0"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dateTv" />
+        app:layout_constraintTop_toBottomOf="@+id/include" />
 
     <android.support.design.widget.TabLayout
         android:id="@+id/photoTabLayout"
@@ -102,18 +102,17 @@
         android:layout_height="0dp"
         android:layout_margin="12dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="8dp"
         android:fontFamily="@font/roboto"
         android:gravity="center_vertical"
-        android:text="fgfghfhg"
         android:textColor="@color/post_text_color"
         android:textSize="15sp"
         app:layout_constraintBottom_toTopOf="@+id/expandLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include"
+        app:layout_constraintTop_toBottomOf="@+id/photoViewPager"
         tools:text="test" />
 
     <LinearLayout
