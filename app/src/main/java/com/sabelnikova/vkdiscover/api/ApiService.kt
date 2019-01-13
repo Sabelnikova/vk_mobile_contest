@@ -13,7 +13,7 @@ interface ApiService {
         const val EXTENDED = 1
     }
 
-    @GET("method/newsfeed.getDiscoverForContestant")
+    @GET("method/newsfeed.get")
     fun getDiscoverForContestant(@Query("count") count: Int,
                                  @Query("start_from") from: String? = null,
                                  @Query("extended") extended: Int = EXTENDED,

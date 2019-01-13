@@ -54,7 +54,7 @@ class MainActivity : DaggerAppCompatActivity() {
                 .get(MainViewModel::class.java)
 
         if (!mainViewModel.userLoggedIn()) {
-            VKSdk.login(this, VKScope.WALL)
+            VKSdk.login(this, VKScope.WALL, VKScope.FRIENDS)
         } else {
             loadData()
         }
